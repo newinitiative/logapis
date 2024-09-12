@@ -1,0 +1,24 @@
+from app.db.mongo import mongo_db
+from app.models.log import Log
+from passlib.context import CryptContext
+
+class LogService:
+    def __init__(self):
+        self.collection = mongo_db.get_collection(User.collection_name)
+        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+    def find_users_by_date(self, start_date, end_date):
+        query = {
+            "created_at": {
+                "$gte": start_date,
+                "$lte": end_date
+            }
+        }
+        return list(self.collection.find(query))
+    
+    def verify_password(self, plain_password, hashed_password):
+        return self.pwd_context.verify(plain_password, hashed_password)
+
+    def get_user(self, username: str):
+        return self.collection.find_one({"username": username})
+
